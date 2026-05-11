@@ -1,36 +1,32 @@
 // ============================================
 // WellNest v2 — chatbot.js
-// FULL WORKING OPENROUTER AI CHATBOT
+// FINAL WORKING OPENROUTER CHATBOT
 // ============================================
 
-// -----------------------------
-// STORE CHAT HISTORY
-// -----------------------------
+// Chat history
 let chatHistory = [];
 
-// -----------------------------
-// OPENROUTER API KEY
-// -----------------------------
+// ============================================
+// API KEY
+// ============================================
 const API_KEY =
   "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";
-
-// -----------------------------
+// ============================================
 // SYSTEM PROMPT
-// -----------------------------
+// ============================================
 const SYSTEM_PROMPT = `
-You are WellBot, a friendly and supportive AI wellness assistant.
+You are WellBot, a friendly AI wellness assistant.
 
-Your role:
-- Help users with wellness, sleep, exercise, food, stress, hydration, and mental wellness
-- Keep responses short and easy to understand
-- Use friendly emojis
-- Be supportive and motivational
+Rules:
+- Help users with sleep, stress, exercise, food, hydration, and wellness
+- Keep answers short and supportive
+- Use emojis
 - Never diagnose diseases
-- Suggest seeing a doctor for serious issues
+- Encourage healthy habits
 `;
 
 // ============================================
-// SEND CHAT MESSAGE
+// SEND CHAT
 // ============================================
 async function sendChat() {
 
@@ -40,7 +36,7 @@ async function sendChat() {
   const message =
     input.value.trim();
 
-  // Prevent empty messages
+  // Empty check
   if (!message) return;
 
   // Clear input
@@ -55,13 +51,13 @@ async function sendChat() {
     content: message
   });
 
-  // Show typing animation
+  // Typing animation
   const typingId = showTyping();
 
   try {
 
     // =====================================
-    // API REQUEST
+    // OPENROUTER REQUEST
     // =====================================
     const response = await fetch(
       "https://openrouter.ai/api/v1/chat/completions",
@@ -69,6 +65,7 @@ async function sendChat() {
         method: "POST",
 
         headers: {
+
           "Authorization":
             `Bearer ${API_KEY}`,
 
@@ -76,15 +73,15 @@ async function sendChat() {
             "application/json",
 
           "HTTP-Referer":
-            window.location.origin,
+            "https://suriyavivekanandan.github.io",
 
           "X-Title":
             "WellNest"
+
         },
 
         body: JSON.stringify({
 
-          // BEST FREE MODEL
           model: "openai/gpt-4o-mini",
 
           messages: [
@@ -101,6 +98,7 @@ async function sendChat() {
           max_tokens: 300,
 
           temperature: 0.7
+
         })
       }
     );
@@ -110,11 +108,11 @@ async function sendChat() {
 
     console.log(data);
 
-    // Remove typing animation
+    // Remove typing
     removeTyping(typingId);
 
     // =====================================
-    // SUCCESS RESPONSE
+    // CHECK RESPONSE
     // =====================================
     if (
       data.choices &&
@@ -125,26 +123,29 @@ async function sendChat() {
         data.choices[0]
         .message.content;
 
-      // Show bot reply
+      // Show bot message
       appendMessage("bot", reply);
 
-      // Save assistant reply
+      // Save reply
       chatHistory.push({
         role: "assistant",
         content: reply
       });
 
-      // Keep last 20 chats
+      // Keep only last 20 chats
       if (chatHistory.length > 20) {
+
         chatHistory =
           chatHistory.slice(-20);
       }
 
     } else {
 
+      console.log(data);
+
       appendMessage(
         "bot",
-        "⚠️ Sorry, AI response unavailable right now."
+        "⚠️ AI did not return a response."
       );
     }
 
@@ -152,10 +153,9 @@ async function sendChat() {
 
     console.error(error);
 
-    // Remove typing animation
     removeTyping(typingId);
 
-    // Fallback reply
+    // Offline fallback
     const fallback =
       getRuleBasedResponse(message);
 
@@ -164,7 +164,7 @@ async function sendChat() {
 }
 
 // ============================================
-// QUICK QUESTION BUTTONS
+// QUICK ASK
 // ============================================
 function quickAsk(question) {
 
@@ -176,7 +176,7 @@ function quickAsk(question) {
 }
 
 // ============================================
-// APPEND CHAT MESSAGE
+// APPEND MESSAGE
 // ============================================
 function appendMessage(role, text) {
 
@@ -219,19 +219,19 @@ function appendMessage(role, text) {
   bubble.innerHTML =
     text.replace(/\n/g, "<br>");
 
-  // Append
+  // Add elements
   wrapper.appendChild(avatar);
   wrapper.appendChild(bubble);
 
   container.appendChild(wrapper);
 
-  // Auto-scroll
+  // Auto scroll
   container.scrollTop =
     container.scrollHeight;
 }
 
 // ============================================
-// TYPING INDICATOR
+// SHOW TYPING
 // ============================================
 function showTyping() {
 
@@ -281,7 +281,7 @@ function removeTyping(id) {
 }
 
 // ============================================
-// OFFLINE FALLBACK RESPONSES
+// OFFLINE FALLBACK
 // ============================================
 function getRuleBasedResponse(message) {
 
@@ -295,12 +295,8 @@ function getRuleBasedResponse(message) {
   ) {
 
     return `
-💧 Staying hydrated is important!
-
-Try drinking:
-• 2–3 litres daily
-• More after exercise
-• Keep a bottle nearby 😊
+💧 Drink 2–3 litres of water daily.
+Hydration improves energy and focus!
     `;
   }
 
@@ -311,11 +307,10 @@ Try drinking:
   ) {
 
     return `
-😴 Better sleep tips:
+😴 Sleep tips:
 
-• Sleep at same time daily
-• Avoid phones before bed
-• Keep room cool & dark
+• Sleep same time daily
+• Avoid screens before bed
 • Aim for 7–8 hours
     `;
   }
@@ -327,63 +322,56 @@ Try drinking:
   ) {
 
     return `
-🧘 Stress relief ideas:
+🧘 Try:
 
 • Deep breathing
-• Short walks
-• Music
+• Walking
 • Meditation
-• Talk to someone you trust 💚
+• Talking to someone 💚
     `;
   }
 
   // Exercise
   if (
     msg.includes("exercise") ||
-    msg.includes("gym") ||
-    msg.includes("workout")
+    msg.includes("gym")
   ) {
 
     return `
-🏋️ Exercise helps both body and mind!
+🏋️ Daily movement improves health!
 
 Try:
 • Walking
 • Strength training
 • Stretching
-• 30 mins daily movement 😊
     `;
   }
 
   // Food
   if (
     msg.includes("food") ||
-    msg.includes("diet") ||
-    msg.includes("protein")
+    msg.includes("diet")
   ) {
 
     return `
-🥗 Healthy eating basics:
+🥗 Eat balanced meals:
 
-• Protein 🍗
-• Vegetables 🥦
-• Fruits 🍎
-• Water 💧
-• Balanced meals 🍚
+• Protein
+• Vegetables
+• Fruits
+• Healthy carbs
     `;
   }
 
   // Default
   return `
-🌿 I'm here to help with:
+🌿 Ask me about:
 
 • Sleep
 • Food
 • Stress
 • Exercise
 • Hydration
-• Mental wellness
-
-Ask me anything 😊
+• Wellness 😊
   `;
 }
