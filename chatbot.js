@@ -1,16 +1,13 @@
 // ============================================
 // WellNest v2 — chatbot.js
-// FINAL WORKING OPENROUTER CHATBOT
+// FINAL SECURE VERSION
 // ============================================
 
-// Chat history
+// ============================================
+// STORE CHAT HISTORY
+// ============================================
 let chatHistory = [];
 
-// ============================================
-// API KEY
-// ============================================
-const API_KEY =
-  "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";
 // ============================================
 // SYSTEM PROMPT
 // ============================================
@@ -31,12 +28,14 @@ Rules:
 async function sendChat() {
 
   const input =
-    document.getElementById("chat-input");
+    document.getElementById(
+      "chat-input"
+    );
 
   const message =
     input.value.trim();
 
-  // Empty check
+  // Prevent empty messages
   if (!message) return;
 
   // Clear input
@@ -51,33 +50,22 @@ async function sendChat() {
     content: message
   });
 
-  // Typing animation
+  // Show typing
   const typingId = showTyping();
 
   try {
 
     // =====================================
-    // OPENROUTER REQUEST
+    // CALL YOUR BACKEND
     // =====================================
     const response = await fetch(
-      "https://openrouter.ai/api/v1/chat/completions",
+      "https://well-nest-backend.onrender.com/chat",
       {
         method: "POST",
 
         headers: {
-
-          "Authorization":
-            `Bearer ${API_KEY}`,
-
           "Content-Type":
-            "application/json",
-
-          "HTTP-Referer":
-            "https://suriyavivekanandan.github.io",
-
-          "X-Title":
-            "WellNest"
-
+            "application/json"
         },
 
         body: JSON.stringify({
@@ -98,7 +86,6 @@ async function sendChat() {
           max_tokens: 300,
 
           temperature: 0.7
-
         })
       }
     );
@@ -112,7 +99,7 @@ async function sendChat() {
     removeTyping(typingId);
 
     // =====================================
-    // CHECK RESPONSE
+    // SUCCESS
     // =====================================
     if (
       data.choices &&
@@ -123,16 +110,16 @@ async function sendChat() {
         data.choices[0]
         .message.content;
 
-      // Show bot message
+      // Show AI reply
       appendMessage("bot", reply);
 
-      // Save reply
+      // Save history
       chatHistory.push({
         role: "assistant",
         content: reply
       });
 
-      // Keep only last 20 chats
+      // Limit memory
       if (chatHistory.length > 20) {
 
         chatHistory =
@@ -145,7 +132,7 @@ async function sendChat() {
 
       appendMessage(
         "bot",
-        "⚠️ AI did not return a response."
+        "⚠️ AI response unavailable."
       );
     }
 
@@ -219,13 +206,14 @@ function appendMessage(role, text) {
   bubble.innerHTML =
     text.replace(/\n/g, "<br>");
 
-  // Add elements
+  // Add
   wrapper.appendChild(avatar);
+
   wrapper.appendChild(bubble);
 
   container.appendChild(wrapper);
 
-  // Auto scroll
+  // Auto-scroll
   container.scrollTop =
     container.scrollHeight;
 }
@@ -281,7 +269,7 @@ function removeTyping(id) {
 }
 
 // ============================================
-// OFFLINE FALLBACK
+// FALLBACK RESPONSES
 // ============================================
 function getRuleBasedResponse(message) {
 
@@ -322,12 +310,12 @@ Hydration improves energy and focus!
   ) {
 
     return `
-🧘 Try:
+🧘 Stress relief ideas:
 
 • Deep breathing
 • Walking
 • Meditation
-• Talking to someone 💚
+• Talk to someone 💚
     `;
   }
 
